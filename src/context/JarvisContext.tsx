@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { initialJarvisState } from "../data/dummydata";
+import { initialJarvisState } from "../data/dummyData";
 
 import type {
   JarvisState,
