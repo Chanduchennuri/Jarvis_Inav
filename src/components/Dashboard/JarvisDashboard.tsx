@@ -1,13 +1,18 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 
 import {
   CheckCircle2,
   Clock3,
   ListTodo,
   Activity,
+  Mic,
+  Terminal,
 } from "lucide-react";
 
 import { useJarvis } from "../../context/JarvisContext";
+import JarvisVoice from "../Voice/JarvisVoice";
+import JarvisTerminal from "../../components/Terminal/JarvisTerminal";
 
 export default function JarvisDashboard() {
   const {
@@ -15,6 +20,9 @@ export default function JarvisDashboard() {
     createTask,
     completeTask,
   } = useJarvis();
+
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [terminalOpen, setTerminalOpen] = useState(false);
 
   const pendingTasks = state.tasks.filter(
     (task) => task.status === "pending"
@@ -37,10 +45,15 @@ export default function JarvisDashboard() {
   return (
     <main className="min-h-screen bg-[#020617] text-slate-100">
 
-      {/* Header */}
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
       <header className="border-b border-slate-800 bg-[#030914]/80 backdrop-blur">
+
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
+
+          {/* Brand */}
 
           <div>
             <p className="font-mono text-[10px] tracking-[0.45em] text-cyan-400">
@@ -56,22 +69,100 @@ export default function JarvisDashboard() {
             </p>
           </div>
 
-          <div className="hidden items-center gap-3 sm:flex">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+          {/* Controls */}
 
-            <span className="font-mono text-xs text-slate-500">
-              SYSTEM ONLINE
-            </span>
+          <div className="flex items-center gap-2">
+
+            {/* Voice */}
+
+            <button
+              onClick={() => {
+                setVoiceOpen(true);
+                setTerminalOpen(false);
+              }}
+              className="flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 font-mono text-xs text-cyan-300 transition hover:bg-cyan-400/10"
+            >
+              <Mic size={14} />
+
+              <span className="hidden sm:inline">
+                VOICE
+              </span>
+            </button>
+
+            {/* Terminal */}
+
+            <button
+              onClick={() => {
+                setTerminalOpen(true);
+                setVoiceOpen(false);
+              }}
+              className="flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 font-mono text-xs text-cyan-300 transition hover:bg-cyan-400/10"
+            >
+              <Terminal size={14} />
+
+              <span className="hidden sm:inline">
+                TERMINAL
+              </span>
+            </button>
+
+            {/* System status */}
+
+            <div className="ml-2 hidden items-center gap-3 lg:flex">
+
+              <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+
+              <span className="font-mono text-xs text-slate-500">
+                SYSTEM ONLINE
+              </span>
+
+            </div>
+
           </div>
 
         </div>
+
       </header>
 
-      {/* Content */}
+
+      {/* =====================================================
+          CONTENT
+      ====================================================== */}
 
       <section className="mx-auto max-w-7xl px-5 py-8">
 
-        {/* Stats */}
+        {/* ===================================================
+            VOICE INTERFACE
+        ==================================================== */}
+
+        {voiceOpen && (
+          <div className="mb-6">
+
+            <JarvisVoice
+              onClose={() => setVoiceOpen(false)}
+            />
+
+          </div>
+        )}
+
+
+        {/* ===================================================
+            TERMINAL INTERFACE
+        ==================================================== */}
+
+        {terminalOpen && (
+          <div className="mb-6">
+
+            <JarvisTerminal
+              onClose={() => setTerminalOpen(false)}
+            />
+
+          </div>
+        )}
+
+
+        {/* ===================================================
+            STATS
+        ==================================================== */}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -101,17 +192,24 @@ export default function JarvisDashboard() {
 
         </div>
 
-        {/* Main grid */}
+
+        {/* ===================================================
+            MAIN GRID
+        ==================================================== */}
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
 
-          {/* Tasks */}
+
+          {/* =================================================
+              TASKS
+          ================================================== */}
 
           <section className="rounded-2xl border border-slate-800 bg-slate-950/50">
 
             <div className="flex items-center justify-between border-b border-slate-800 p-5">
 
               <div>
+
                 <p className="font-mono text-[10px] tracking-widest text-cyan-400">
                   TASK CENTER
                 </p>
@@ -119,6 +217,7 @@ export default function JarvisDashboard() {
                 <h2 className="mt-1 text-lg font-medium">
                   Today's tasks
                 </h2>
+
               </div>
 
               <button
@@ -130,60 +229,103 @@ export default function JarvisDashboard() {
 
             </div>
 
+
+            {/* Task list */}
+
             <div className="divide-y divide-slate-800">
 
-              {state.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-4 p-5"
-                >
+              {state.tasks.length === 0 ? (
 
-                  <button
-                    onClick={() => {
-                      if (task.status === "pending") {
-                        completeTask(task.id);
-                      }
-                    }}
-                    className="shrink-0"
-                  >
-                    <CheckCircle2
-                      size={20}
-                      className={
-                        task.status === "completed"
-                          ? "text-emerald-400"
-                          : "text-slate-700 hover:text-cyan-400"
-                      }
-                    />
-                  </button>
+                <div className="p-8 text-center">
 
-                  <div className="min-w-0">
-                    <p
-                      className={
-                        task.status === "completed"
-                          ? "truncate text-sm text-slate-600 line-through"
-                          : "truncate text-sm text-slate-200"
-                      }
-                    >
-                      {task.title}
-                    </p>
+                  <p className="text-sm text-slate-600">
+                    No tasks yet.
+                  </p>
 
-                    <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-slate-700">
-                      {task.status}
-                    </p>
-                  </div>
+                  <p className="mt-1 font-mono text-[10px] text-slate-700">
+                    Use VOICE or TERMINAL to create one.
+                  </p>
 
                 </div>
-              ))}
+
+              ) : (
+
+                state.tasks.map((task) => (
+
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-4 p-5"
+                  >
+
+                    {/* Complete button */}
+
+                    <button
+                      onClick={() => {
+
+                        if (
+                          task.status === "pending"
+                        ) {
+                          completeTask(task.id);
+                        }
+
+                      }}
+                      disabled={
+                        task.status === "completed"
+                      }
+                      className="shrink-0"
+                    >
+
+                      <CheckCircle2
+                        size={20}
+                        className={
+                          task.status === "completed"
+                            ? "text-emerald-400"
+                            : "text-slate-700 hover:text-cyan-400"
+                        }
+                      />
+
+                    </button>
+
+
+                    {/* Task information */}
+
+                    <div className="min-w-0">
+
+                      <p
+                        className={
+                          task.status === "completed"
+                            ? "truncate text-sm text-slate-600 line-through"
+                            : "truncate text-sm text-slate-200"
+                        }
+                      >
+                        {task.title}
+                      </p>
+
+                      <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-slate-700">
+                        {task.status}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                ))
+
+              )}
 
             </div>
 
           </section>
 
-          {/* Timeline */}
+
+          {/* =================================================
+              TIMELINE
+          ================================================== */}
 
           <section className="rounded-2xl border border-slate-800 bg-slate-950/50">
 
             <div className="border-b border-slate-800 p-5">
+
               <p className="font-mono text-[10px] tracking-widest text-cyan-400">
                 ACTIVITY
               </p>
@@ -191,32 +333,46 @@ export default function JarvisDashboard() {
               <h2 className="mt-1 text-lg font-medium">
                 Timeline
               </h2>
+
             </div>
+
 
             <div className="p-5">
 
               <div className="space-y-6">
 
-                {state.timeline.map((item) => (
-                  <div
-                    key={item.id}
-                    className="relative pl-6"
-                  >
+                {state.timeline.length === 0 ? (
 
-                    <div className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-cyan-400" />
+                  <p className="text-sm text-slate-600">
+                    No activity yet.
+                  </p>
 
-                    <p className="text-sm text-slate-300">
-                      {item.title}
-                    </p>
+                ) : (
 
-                    <p className="mt-1 font-mono text-[9px] text-slate-700">
-                      {new Date(
-                        item.timestamp
-                      ).toLocaleTimeString()}
-                    </p>
+                  state.timeline.map((item) => (
 
-                  </div>
-                ))}
+                    <div
+                      key={item.id}
+                      className="relative pl-6"
+                    >
+
+                      <div className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-cyan-400" />
+
+                      <p className="text-sm text-slate-300">
+                        {item.title}
+                      </p>
+
+                      <p className="mt-1 font-mono text-[9px] text-slate-700">
+                        {new Date(
+                          item.timestamp
+                        ).toLocaleTimeString()}
+                      </p>
+
+                    </div>
+
+                  ))
+
+                )}
 
               </div>
 
@@ -227,9 +383,15 @@ export default function JarvisDashboard() {
         </div>
 
       </section>
+
     </main>
   );
 }
+
+
+/* ============================================================
+   STAT CARD
+============================================================ */
 
 interface StatCardProps {
   icon: ReactNode;
@@ -242,6 +404,7 @@ function StatCard({
   label,
   value,
 }: StatCardProps) {
+
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5">
 
