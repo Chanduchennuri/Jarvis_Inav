@@ -68,7 +68,7 @@ export default function Welcome({ onComplete }: WelcomeProps) {
         </div>
 
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Welcome Inav
+          Welcome SekharChennuri(Admin)
         </h1>
 
         <p className="mt-3 text-sm text-slate-400">
